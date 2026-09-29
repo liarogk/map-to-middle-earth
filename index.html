@@ -147,8 +147,8 @@
                         </button>
                     </div>
 
-                    <!-- Explicit Viewport Height to Fix Display -->
-                    <div id="map-viewport" class="w-full h-[600px] md:h-[650px] relative overflow-hidden parchment-texture cursor-grab active:cursor-grabbing" onmousedown="startPan(event)" onmousemove="panMap(event)" onmouseup="endPan()" onmouseleave="endPan()" onwheel="handleWheel(event)">
+                    <!-- Viewport Height -->
+                    <div id="map-viewport" class="w-full h-[600px] md:h-[680px] relative overflow-hidden parchment-texture cursor-grab active:cursor-grabbing" onmousedown="startPan(event)" onmousemove="panMap(event)" onmouseup="endPan()" onmouseleave="endPan()" onwheel="handleWheel(event)">
                         
                         <div id="map-canvas" class="absolute inset-0 w-full h-full transition-transform duration-75 origin-center">
                             
@@ -170,33 +170,47 @@
                     </div>
                 </div>
 
-                <!-- Sidebar Details Panel -->
-                <div class="bg-tolkien-cardbg border border-tolkien-border rounded-2xl p-5 flex flex-col shadow-2xl h-[650px]">
+                <!-- Sidebar Details Panel with Custom Illustrated Card -->
+                <div class="bg-tolkien-cardbg border border-tolkien-border rounded-2xl p-5 flex flex-col shadow-2xl h-[680px] overflow-y-auto">
                     
-                    <div id="location-detail-panel" class="mb-4 pb-4 border-b border-tolkien-border">
-                        <div class="flex items-start justify-between gap-3 mb-2">
-                            <div>
-                                <span id="detail-category" class="text-[10px] font-cinzel uppercase tracking-widest px-2 py-0.5 rounded bg-tolkien-gold/20 text-tolkien-gold border border-tolkien-gold/30">Select a Pin</span>
-                                <h2 id="detail-title" class="text-xl font-bold font-cinzel text-tolkien-parchment mt-1">Explore Middle-earth</h2>
+                    <div id="location-detail-panel" class="space-y-4">
+                        <!-- Custom Fantasy Illustration Card Container (Guaranteed Accurate Visual) -->
+                        <div id="detail-art-card" class="relative w-full h-48 rounded-xl overflow-hidden border-2 border-tolkien-gold/40 shadow-xl flex flex-col items-center justify-center p-6 text-center transition-all duration-500 bg-gradient-to-br from-stone-900 via-stone-950 to-black">
+                            <!-- Background pattern glow -->
+                            <div id="art-glow" class="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-600 via-transparent to-transparent"></div>
+                            
+                            <!-- SVG Illustration Asset -->
+                            <div id="art-svg-container" class="relative z-10 text-tolkien-gold mb-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
+                                <!-- Dynamic SVG Injected Here -->
                             </div>
-                            <div id="detail-icon" class="p-2.5 rounded-xl bg-black/40 border border-tolkien-border text-tolkien-gold">
-                                <i data-lucide="map-pin" class="w-5 h-5"></i>
-                            </div>
+                            <span id="art-subtitle" class="relative z-10 text-[10px] font-cinzel tracking-widest uppercase text-amber-200/80 font-semibold bg-black/60 px-3 py-1 rounded-full border border-tolkien-gold/30">Middle-earth Sanctuary</span>
+                            <span id="detail-category" class="absolute bottom-2 left-2 text-[10px] font-cinzel uppercase tracking-widest px-2 py-0.5 rounded bg-tolkien-gold/90 text-black font-bold">Select a Pin</span>
                         </div>
-                        <p id="detail-description" class="text-xs text-stone-300 font-lora leading-relaxed mb-3">
-                            Click any location marker on the map or choose an entry from the directory below to reveal ancient histories and lore.
-                        </p>
+
+                        <div>
+                            <div class="flex items-start justify-between gap-3">
+                                <h2 id="detail-title" class="text-xl font-bold font-cinzel text-tolkien-parchment">Explore Middle-earth</h2>
+                                <div id="detail-icon" class="p-2 rounded-xl bg-black/40 border border-tolkien-border text-tolkien-gold shrink-0">
+                                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            <p id="detail-description" class="text-xs text-stone-300 font-lora leading-relaxed mt-2 mb-3">
+                                Click any location marker on the map or choose an entry from the directory below to reveal ancient histories and immersive lore.
+                            </p>
+                        </div>
+
                         <div id="detail-quote-box" class="hidden bg-black/40 border-l-2 border-tolkien-gold p-3 rounded-r-xl italic text-xs text-stone-300 font-lora">
                             "<span id="detail-quote"></span>"
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-sm font-cinzel font-bold text-stone-300 uppercase tracking-wider">Locations Directory</h3>
-                        <span id="location-count" class="text-xs text-stone-500 font-cinzel">0 locations</span>
+                    <div class="border-t border-tolkien-border pt-4 mt-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-cinzel font-bold text-stone-300 uppercase tracking-wider">Locations Directory</h3>
+                            <span id="location-count" class="text-xs text-stone-500 font-cinzel">0 locations</span>
+                        </div>
+                        <div id="locations-list" class="space-y-2"></div>
                     </div>
-
-                    <div id="locations-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
                 </div>
 
             </div>
@@ -268,30 +282,169 @@
             third: {
                 title: "Third Age: The War of the Ring",
                 locations: [
-                    { id: 'shire', name: 'The Shire', category: 'The Shire & Vales', x: 20, y: 50, desc: 'A peaceful, pastoral land inhabited by Hobbits, nestled in the northwest of Eriador.', quote: "In a hole in the ground there lived a hobbit.", icon: 'home' },
-                    { id: 'rivendell', name: 'Rivendell (Imladris)', category: 'Elven Realms', x: 42, y: 45, desc: 'The Last Homely House East of the Sea, hidden deep in the foothills of the Misty Mountains.', quote: "Here is the meeting place of Elves and Men.", icon: 'shield' },
-                    { id: 'moria', name: 'Khazad-dûm (Moria)', category: 'Dwarven Realms', x: 48, y: 60, desc: 'The ancient and magnificent subterranean realm of the Dwarves, now overrun by shadow.', quote: "The world is changed. I feel it in the water.", icon: 'mountain' },
-                    { id: 'lorien', name: 'Lothlórien', category: 'Elven Realms', x: 58, y: 58, desc: 'The golden wood of the Galadhrim, ruled by Lady Galadriel and Celeborn.', quote: "The power of the Three Rings is dread and wise.", icon: 'sparkles' },
-                    { id: 'rohan', name: 'Edoras & Rohan', category: 'Realms of Men', x: 65, y: 72, desc: 'The vast grassy plains of the Horse-lords, famous for their mighty cavalry.', quote: "Arise, arise, Riders of Théoden!", icon: 'flag' },
-                    { id: 'gondor', name: 'Minas Tirith', category: 'Realms of Men', x: 80, y: 82, desc: 'The White City and capital of Gondor, built in seven towering tiers.', quote: "Hope is not dwindled.", icon: 'castle' },
-                    { id: 'mordor', name: 'Mordor & Mount Doom', category: 'Dark Lands', x: 90, y: 78, desc: 'The desolate volcanic land of Sauron, bounded by jagged mountain ranges.', quote: "One Ring to rule them all...", icon: 'flame' },
-                    { id: 'erebor', name: 'Erebor (Lonely Mountain)', category: 'Dwarven Realms', x: 74, y: 30, desc: 'The majestic underground kingdom of the Dwarves under the mountain.', quote: "Far over the misty mountains cold...", icon: 'gem' }
+                    { 
+                        id: 'shire', 
+                        name: 'The Shire', 
+                        category: 'The Shire & Vales', 
+                        x: 20, y: 50, 
+                        desc: 'A peaceful, pastoral land inhabited by Hobbits, nestled in the northwest of Eriador with round-door smials and rolling green hills.', 
+                        quote: "In a hole in the ground there lived a hobbit.", 
+                        icon: 'home', 
+                        theme: 'from-emerald-950 via-green-900 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18M5 21V10l7-7 7 7v11M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/><circle cx="12" cy="11" r="3"/><path d="M12 8v3l2 1"/></svg>`
+                    },
+                    { 
+                        id: 'rivendell', 
+                        name: 'Rivendell (Imladris)', 
+                        category: 'Elven Realms', 
+                        x: 42, y: 45, 
+                        desc: 'The Last Homely House East of the Sea, hidden deep in the wooded gorges of the Misty Mountains, renowned for cascading waterfalls and graceful Elven architecture.', 
+                        quote: "Here is the meeting place of Elves and Men.", 
+                        icon: 'shield', 
+                        theme: 'from-teal-950 via-cyan-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`
+                    },
+                    { 
+                        id: 'moria', 
+                        name: 'Khazad-dûm (Moria)', 
+                        category: 'Dwarven Realms', 
+                        x: 48, y: 60, 
+                        desc: 'The ancient and magnificent subterranean realm of the Dwarves carved deep within the mountains, now echoing with the terror of shadow and flame.', 
+                        quote: "The world is changed. I feel it in the water.", 
+                        icon: 'mountain', 
+                        theme: 'from-amber-950 via-stone-900 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3l4 8 4-8M2 21h20M5 21v-4a7 7 0 0114 0v4"/></svg>`
+                    },
+                    { 
+                        id: 'lorien', 
+                        name: 'Lothlórien', 
+                        category: 'Elven Realms', 
+                        x: 58, y: 58, 
+                        desc: 'The golden wood of the Galadhrim where mallorn trees gleam with silver bark and golden autumn leaves never fall.', 
+                        quote: "The power of the Three Rings is dread and wise.", 
+                        icon: 'sparkles', 
+                        theme: 'from-yellow-950 via-amber-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`
+                    },
+                    { 
+                        id: 'rohan', 
+                        name: 'Edoras & Rohan', 
+                        category: 'Realms of Men', 
+                        x: 65, y: 72, desc: 'The vast grassy plains of the Horse-lords, guarded by the golden-roofed Meduseld hall atop the hill of Edoras.', 
+                        quote: "Arise, arise, Riders of Théoden!", 
+                        icon: 'flag', 
+                        theme: 'from-yellow-900 via-stone-900 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></svg>`
+                    },
+                    { 
+                        id: 'gondor', 
+                        name: 'Minas Tirith', 
+                        category: 'Realms of Men', 
+                        x: 80, y: 82, 
+                        desc: 'The White City and capital of Gondor, built in seven towering tiers around the Hill of Guard with the White Tree blooming in the citadel.', 
+                        quote: "Hope is not dwindled.", 
+                        icon: 'castle', 
+                        theme: 'from-blue-950 via-slate-900 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 22V12l6-8 6 8v10M6 16h12M10 22v-4h4v4"/></svg>`
+                    },
+                    { 
+                        id: 'mordor', 
+                        name: 'Mordor & Mount Doom', 
+                        category: 'Dark Lands', 
+                        x: 90, y: 78, 
+                        desc: 'The desolate volcanic wasteland of Sauron, girt by the jagged peaks of the Mountains of Shadow and lit by the lidless Eye from Barad-dûr.', 
+                        quote: "One Ring to rule them all...", 
+                        icon: 'flame', 
+                        theme: 'from-red-950 via-rose-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>`
+                    },
+                    { 
+                        id: 'erebor', 
+                        name: 'Erebor (Lonely Mountain)', 
+                        category: 'Dwarven Realms', 
+                        x: 74, y: 30, 
+                        desc: 'The majestic underground kingdom of the Dwarves beneath the Lonely Mountain, rich in gold and ancient craft.', 
+                        quote: "Far over the misty mountains cold...", 
+                        icon: 'gem', 
+                        theme: 'from-amber-950 via-yellow-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M12 3v21"/></svg>`
+                    }
                 ]
             },
             second: {
                 title: "Second Age: Númenor & Eregion",
                 locations: [
-                    { id: 'numenor', name: 'Númenor', category: 'Realms of Men', x: 20, y: 60, desc: 'The legendary star-shaped island kingdom bestowed upon the Edain.', quote: "And the isle of Elenna sank beneath the great waves.", icon: 'anchor' },
-                    { id: 'eregion', name: 'Eregion', category: 'Elven Realms', x: 45, y: 48, desc: 'The Elven realm where the Rings of Power were forged.', quote: "The Rings of Power were crafted in craftiness.", icon: 'sparkles' },
-                    { id: 'lindon', name: 'Lindon', category: 'Elven Realms', x: 25, y: 40, desc: 'The westernmost Elven realm in Middle-earth under High King Gil-galad.', quote: "Grey ship upon the western sea.", icon: 'feather' }
+                    { 
+                        id: 'numenor', 
+                        name: 'Númenor', 
+                        category: 'Realms of Men', 
+                        x: 20, y: 60, 
+                        desc: 'The legendary star-shaped island kingdom of Elenna bestowed upon the Edain, home of great mariners and kings.', 
+                        quote: "And the isle of Elenna sank beneath the great waves.", 
+                        icon: 'anchor', 
+                        theme: 'from-sky-950 via-blue-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>`
+                    },
+                    { 
+                        id: 'eregion', 
+                        name: 'Eregion', 
+                        category: 'Elven Realms', 
+                        x: 45, y: 48, 
+                        desc: 'The fair Elven realm adjacent to Moria where the Guild of Jewel-smiths forged the Rings of Power.', 
+                        quote: "The Rings of Power were crafted in craftiness.", 
+                        icon: 'sparkles', 
+                        theme: 'from-emerald-950 via-teal-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7z"/></svg>`
+                    },
+                    { 
+                        id: 'lindon', 
+                        name: 'Lindon', 
+                        category: 'Elven Realms', 
+                        x: 25, y: 40, 
+                        desc: 'The westernmost Elven realm in Middle-earth on the shores of the Gulf of Lhûn, ruled by High King Gil-galad.', 
+                        quote: "Grey ship upon the western sea.", 
+                        icon: 'feather', 
+                        theme: 'from-slate-900 via-zinc-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5zM16 8L2 22M17.5 15H9"/></svg>`
+                    }
                 ]
             },
             first: {
                 title: "First Age: Wars of Beleriand",
                 locations: [
-                    { id: 'gondolin', name: 'Gondolin', category: 'Elven Realms', x: 35, y: 40, desc: 'The secret hidden city of King Turgon.', quote: "Hidden from the eyes of Morgoth.", icon: 'shield' },
-                    { id: 'angband', name: 'Angband', category: 'Dark Lands', x: 65, y: 25, desc: 'The great subterranean fortress of Morgoth, the first Dark Lord.', quote: "The Iron Hells of Melkor.", icon: 'flame' },
-                    { id: 'doriath', name: 'Doriath', category: 'Elven Realms', x: 50, y: 55, desc: 'The protected woodland realm of King Thingol and Melian.', quote: "The protected forest of the Sindar.", icon: 'sparkles' }
+                    { 
+                        id: 'gondolin', 
+                        name: 'Gondolin', 
+                        category: 'Elven Realms', 
+                        x: 35, y: 40, 
+                        desc: 'The secret hidden city of King Turgon nestled within the ring of mountains known as Crith Taras.', 
+                        quote: "Hidden from the eyes of Morgoth.", 
+                        icon: 'shield', 
+                        theme: 'from-indigo-950 via-purple-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l10 4v6c0 5.55-3.84 10.74-10 12-6.16-1.26-10-6.45-10-12V6l10-4z"/></svg>`
+                    },
+                    { 
+                        id: 'angband', 
+                        name: 'Angband', 
+                        category: 'Dark Lands', 
+                        x: 65, y: 25, 
+                        desc: 'The great subterranean fortress of Morgoth beneath the triple-peaked mountains of Thangorodrim.', 
+                        quote: "The Iron Hells of Melkor.", 
+                        icon: 'flame', 
+                        theme: 'from-red-950 via-neutral-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 20h20M4 20l4-10 4 6 4-12 4 16"/></svg>`
+                    },
+                    { 
+                        id: 'doriath', 
+                        name: 'Doriath', 
+                        category: 'Elven Realms', 
+                        x: 50, y: 55, 
+                        desc: 'The enchanted protected woodland realm of King Thingol and Melian the Maia, enfolded by the Girdle of Melian.', 
+                        quote: "The protected forest of the Sindar.", 
+                        icon: 'sparkles', 
+                        theme: 'from-emerald-950 via-green-950 to-black',
+                        svgArt: `<svg class="w-16 h-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`
+                    }
                 ]
             }
         };
@@ -424,6 +577,12 @@
             document.getElementById('detail-title').textContent = loc.name;
             document.getElementById('detail-description').textContent = loc.desc;
             
+            // Apply custom vector art card and theme
+            const artCard = document.getElementById('detail-art-card');
+            artCard.className = `relative w-full h-48 rounded-xl overflow-hidden border-2 border-tolkien-gold/40 shadow-xl flex flex-col items-center justify-center p-6 text-center transition-all duration-500 bg-gradient-to-br ${loc.theme}`;
+            document.getElementById('art-svg-container').innerHTML = loc.svgArt;
+            document.getElementById('art-subtitle').textContent = loc.category;
+
             const quoteBox = document.getElementById('detail-quote-box');
             if (loc.quote) {
                 quoteBox.classList.remove('hidden');
