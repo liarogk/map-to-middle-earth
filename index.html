@@ -1,657 +1,576 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Middle-earth Interactive Map & Expanded Codex</title>
+    <title>Ultimate Middle-earth Interactive Map & Legendarium</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=IM+Fell+English:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
+                    colors: {
+                        tolkien: {
+                            gold: '#d4af37',
+                            darkgold: '#aa820a',
+                            parchment: '#f4ebd0',
+                            darkbg: '#12100e',
+                            cardbg: '#1c1815',
+                            border: '#3d3224',
+                            mordor: '#8b0000',
+                            shire: '#2e5a27'
+                        }
+                    },
                     fontFamily: {
                         cinzel: ['Cinzel', 'serif'],
-                        fell: ['IM Fell English', 'serif'],
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        parchment: {
-                            DEFAULT: '#f4ebd0',
-                            dark: '#e3d2ab',
-                            light: '#faf6e8',
-                            border: '#c2a878'
-                        },
-                        ring: {
-                            gold: '#dfb15b',
-                            darkgold: '#b8860b',
-                            dark: '#1a1816',
-                            card: '#24211e'
-                        }
+                        lora: ['Lora', 'serif']
                     }
                 }
             }
         }
     </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            background-color: #121110;
-            color: #e5dec9;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-        .cinzel { font-family: 'Cinzel', serif; }
-        .fell { font-family: 'IM Fell English', serif; }
+        body { font-family: 'Lora', serif; background-color: #12100e; color: #f4ebd0; overflow-x: hidden; }
+        h1, h2, h3, h4, h5, h6, .font-cinzel { font-family: 'Cinzel', serif; }
         
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1a1816;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #6b5837;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #dfb15b;
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1c1815; }
+        ::-webkit-scrollbar-thumb { background: #3d3224; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+
+        .parchment-texture {
+            background-color: #1b1612;
+            background-image: radial-gradient(#3d3224 1px, transparent 1px), radial-gradient(#3d3224 1px, #1b1612 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
         }
 
-        .map-container {
-            position: relative;
-            background-color: #151311;
-            background-image: 
-                radial-gradient(ellipse at center, rgba(30, 26, 21, 0.7) 0%, rgba(10, 9, 8, 0.95) 100%),
-                repeating-linear-gradient(0deg, transparent, transparent 100px, rgba(194, 168, 120, 0.03) 100px, rgba(194, 168, 120, 0.03) 101px),
-                repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(194, 168, 120, 0.03) 100px, rgba(194, 168, 120, 0.03) 101px);
-            overflow: hidden;
-            border: 2px solid #594a32;
+        .particle {
+            position: absolute;
+            background: rgba(212, 175, 55, 0.6);
+            pointer-events: none;
+            border-radius: 50%;
+            animation: fall linear infinite;
         }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.4); opacity: 0.2; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
-        .marker-pulse {
-            animation: pulse-ring 2.5s infinite ease-in-out;
+        @keyframes fall {
+            0% { transform: translateY(-10px) translateX(0); opacity: 0; }
+            20% { opacity: 0.8; }
+            100% { transform: translateY(105vh) translateX(50px); opacity: 0; }
         }
     </style>
 </head>
-<body class="h-full flex flex-col">
+<body class="min-h-screen flex flex-col selection:bg-tolkien-gold selection:text-black">
 
-    <header class="bg-black/90 border-b border-amber-900/40 px-6 py-4 flex flex-wrap justify-between items-center shadow-2xl z-20 backdrop-blur-md">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center border border-amber-300 shadow-[0_0_15px_rgba(223,177,91,0.5)]">
-                <span class="cinzel font-black text-black text-lg">ℜ</span>
-            </div>
-            <div>
-                <h1 class="cinzel font-bold text-xl md:text-2xl text-amber-100 tracking-wider">Middle-earth Codex</h1>
-                <p class="text-xs text-amber-400/70 italic fell">Expanded Cartography & Lore Compendium</p>
-            </div>
-        </div>
+    <div id="particle-container" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
 
-        <div class="flex flex-wrap items-center space-x-3 mt-3 sm:mt-0">
-            <!-- Search Bar -->
-            <div class="relative">
-                <input type="text" id="searchInput" oninput="filterLocations()" placeholder="Search realms, towers..." class="bg-stone-900 border border-amber-900/50 rounded px-3 py-1.5 text-sm text-amber-100 placeholder-stone-500 focus:outline-none focus:border-amber-500 w-48 sm:w-60">
-            </div>
-
-            <button id="toggleJourneyBtn" onclick="toggleJourney()" class="px-3 py-1.5 rounded bg-amber-900/30 hover:bg-amber-800/50 border border-amber-600/50 text-amber-200 text-xs sm:text-sm cinzel transition-all flex items-center space-x-1.5 shadow-lg">
-                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-                <span id="journeyBtnText">Fellowship Path: Off</span>
-            </button>
-            <button onclick="openAboutModal()" class="px-3 py-1.5 rounded bg-stone-800 hover:bg-stone-700 border border-stone-600 text-stone-300 text-xs sm:text-sm cinzel transition-all">
-                GitHub Info
-            </button>
-        </div>
-    </header>
-
-    <nav class="bg-stone-950 border-b border-amber-900/30 px-6 py-2.5 flex space-x-2 overflow-x-auto z-10">
-        <button onclick="setCategory('all')" id="cat-all" class="category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-amber-600 text-black transition-all">All Realms</button>
-        <button onclick="setCategory('hobbit')" id="cat-hobbit" class="category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-stone-800 text-stone-300 hover:bg-stone-700 transition-all">The Shire & Wild</button>
-        <button onclick="setCategory('elven')" id="cat-elven" class="category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-stone-800 text-stone-300 hover:bg-stone-700 transition-all">Elven Sanctuaries</button>
-        <button onclick="setCategory('dwarven')" id="cat-dwarven" class="category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-stone-800 text-stone-300 hover:bg-stone-700 transition-all">Dwarven & Underground</button>
-        <button onclick="setCategory('men')" id="cat-men" class="category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-stone-800 text-stone-300 hover:bg-stone-700 transition-all">Realms of Men</button>
-        <button onclick="setCategory('shadow')" id="cat-shadow" class="category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-stone-800 text-stone-300 hover:bg-stone-700 transition-all">Shadow & Mordor</button>
-    </nav>
-
-    <main class="flex-1 flex flex-col lg:flex-row relative overflow-hidden">
-        
-        <!-- Interactive Map Canvas Workspace -->
-        <div class="flex-1 map-container relative flex items-center justify-center p-4 min-h-[500px] lg:min-h-full cursor-grab active:cursor-grabbing" id="mapWorkspace">
-            
-            <svg id="mapSvg" class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice">
-                <defs>
-                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-                    </filter>
-                </defs>
-
-                <!-- Schematic Mountain Ranges -->
-                <path d="M 420 120 L 450 160 L 440 180 L 480 230 L 470 260 L 510 320 L 490 380 L 530 450 L 510 500" fill="none" stroke="#4a3b2c" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
-                <path d="M 435 140 L 460 190 L 495 270 L 520 370 L 500 440" fill="none" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4"/>
-                
-                <!-- Ephel Dúath / Mountains of Shadow (Mordor rim) -->
-                <path d="M 720 520 Q 800 580 850 700" fill="none" stroke="#3d2c1d" stroke-width="8" opacity="0.7"/>
-                
-                <!-- Rivers -->
-                <path d="M 280 250 Q 300 280 290 330" fill="none" stroke="#315c72" stroke-width="3" opacity="0.7"/>
-                <path d="M 520 200 Q 560 300 530 450 Q 510 550 560 620" fill="none" stroke="#315c72" stroke-width="4" opacity="0.7"/>
-
-                <!-- Fellowship Journey Path (Bag End -> Rivendell -> Moria -> Lothlórien -> Rauros -> Minas Tirith -> Mordor) -->
-                <g id="fellowshipPathGroup" class="transition-opacity duration-700 opacity-0">
-                    <path d="M 140 320 Q 240 280 320 260 Q 390 230 430 210 Q 480 320 500 400 Q 560 450 630 490 Q 690 540 750 560 Q 820 590 890 620" 
-                          fill="none" stroke="#dfb15b" stroke-width="3.5" stroke-dasharray="8 6" filter="url(#glow)">
-                        <animate attributeName="stroke-dashoffset" values="100;0" dur="20s" repeatCount="indefinite" />
-                    </path>
-                </g>
-            </svg>
-
-            <!-- Pins Container -->
-            <div id="markersContainer" class="absolute inset-0 w-full h-full pointer-events-auto">
-                <!-- Populated dynamically -->
-            </div>
-
-            <!-- Map Legend Helper Overlay -->
-            <div class="absolute bottom-4 left-4 bg-black/80 border border-amber-900/50 p-3 rounded-lg backdrop-blur-sm text-xs text-amber-200/80 pointer-events-none hidden sm:block shadow-xl">
-                <p class="cinzel font-bold text-amber-400 mb-1">Cartography Legend</p>
-                <p>• Click any landmark pin to view full records.</p>
-                <p>• Filter by region using the top bar navigation.</p>
-            </div>
-        </div>
-
-        <aside id="loreSidebar" class="w-full lg:w-[460px] bg-ring-dark border-t lg:border-t-0 lg:border-l border-amber-900/40 flex flex-col shadow-2xl z-10">
-            <!-- Default Placeholder State -->
-            <div id="sidebarDefault" class="p-8 flex-1 flex flex-col items-center justify-center text-center text-stone-400">
-                <div class="w-20 h-20 rounded-full border-2 border-dashed border-amber-700/60 flex items-center justify-center mb-4 bg-amber-950/20">
-                    <svg class="w-10 h-10 text-amber-600/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                </div>
-                <h3 class="cinzel text-xl text-amber-200 font-bold mb-2">The Red Book of Westmarch</h3>
-                <p class="fell text-stone-400 max-w-sm">"Not all those who wander are lost." Select any pin upon the expanded cartography map to study its historical records, significant battles, and inhabitants.</p>
-            </div>
-
-            <!-- Active Lore Details Panel -->
-            <div id="sidebarContent" class="hidden flex-1 flex flex-col overflow-y-auto">
-                <div class="relative h-48 bg-stone-900 overflow-hidden border-b border-amber-900/50 flex-shrink-0">
-                    <img id="locImage" src="" alt="Location Banner" class="w-full h-full object-cover opacity-70 filter saturate-50 hover:saturate-100 transition-all duration-500" onerror="this.src='https://placehold.co/600x300/2c241d/dfb15b?text=Middle-earth+Archive'">
-                    <div class="absolute inset-0 bg-gradient-to-t from-ring-dark via-ring-dark/40 to-transparent"></div>
-                    <div class="absolute bottom-4 left-6 right-6 flex justify-between items-end">
-                        <div>
-                            <span id="locRegion" class="text-xs cinzel uppercase tracking-widest px-2 py-0.5 rounded bg-amber-900/70 text-amber-200 border border-amber-600/40">Region</span>
-                            <h2 id="locTitle" class="cinzel font-bold text-2xl text-amber-100 mt-1 drop-shadow-md">Location Name</h2>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-6 space-y-6">
-                    <div>
-                        <h4 class="cinzel text-xs font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-amber-500 mr-2"></span> Chronicle Description
-                        </h4>
-                        <p id="locDescription" class="fell text-stone-300 text-lg leading-relaxed"></p>
-                    </div>
-
-                    <div class="bg-black/30 p-4 rounded-lg border border-amber-900/20">
-                        <h4 class="cinzel text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Notable Historical Events</h4>
-                        <ul id="locEvents" class="space-y-2 text-sm text-stone-300 font-sans"></ul>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-black/30 p-3 rounded-lg border border-amber-900/20">
-                            <h5 class="cinzel text-xs font-bold text-amber-400 mb-1">Inhabitants</h5>
-                            <p id="locInhabitants" class="text-sm text-stone-300"></p>
-                        </div>
-                        <div class="bg-black/30 p-3 rounded-lg border border-amber-900/20">
-                            <h5 class="cinzel text-xs font-bold text-amber-400 mb-1">Relics & Artifacts</h5>
-                            <p id="locArtifacts" class="text-sm text-stone-300"></p>
-                        </div>
-                    </div>
-
-                    <div class="p-4 rounded-lg bg-amber-950/20 border-l-4 border-amber-600 italic fell text-amber-200/90 text-base">
-                        <p id="locQuote">"Quote goes here..."</p>
-                        <p id="locQuoteAuthor" class="text-xs cinzel text-right text-amber-400/80 mt-2">— Author</p>
-                    </div>
+    <!-- Header -->
+    <header class="border-b border-tolkien-border bg-tolkien-cardbg/90 backdrop-blur sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <i data-lucide="compass" class="w-8 h-8 text-tolkien-gold"></i>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold font-cinzel tracking-wider text-tolkien-gold">Middle-earth Legendarium</h1>
+                    <p class="text-xs text-stone-400 font-lora italic">Interactive Cartography & Lore Archive</p>
                 </div>
             </div>
-        </aside>
 
-    </main>
+            <!-- Tabs -->
+            <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-tolkien-border">
+                <button onclick="switchTab('map')" id="tab-btn-map" class="px-4 py-1.5 rounded-lg text-sm font-cinzel font-semibold transition-all bg-tolkien-gold text-black shadow">Map & Lore</button>
+                <button onclick="switchTab('timeline')" id="tab-btn-timeline" class="px-4 py-1.5 rounded-lg text-sm font-cinzel font-semibold transition-all text-stone-300 hover:text-white">Journey Timeline</button>
+                <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="px-4 py-1.5 rounded-lg text-sm font-cinzel font-semibold transition-all text-stone-300 hover:text-white">Where in Arda?</button>
+            </div>
 
-    <div id="aboutModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-stone-900 border border-amber-700/60 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
-            <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-stone-400 hover:text-amber-300 text-xl font-bold">&times;</button>
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-amber-600 flex items-center justify-center text-black cinzel font-bold">GH</div>
-                <h3 class="cinzel text-xl font-bold text-amber-200">GitHub Deployment Guide</h3>
-            </div>
-            <p class="text-stone-300 text-sm mb-4 leading-relaxed">
-                This expanded interactive map is entirely contained within this single file, making it ready for instant repository upload and free hosting via GitHub Pages.
-            </p>
-            <div class="bg-black/40 p-4 rounded border border-stone-800 text-xs font-mono text-amber-300/90 mb-6 space-y-1">
-                <p>1. Save code as <code class="text-amber-400">index.html</code></p>
-                <p>2. Initialize repository: <code class="text-amber-400">git init && git add .</code></p>
-                <p>3. Commit & push: <code class="text-amber-400">git commit -m "Add expanded Tolkien map"</code></p>
-                <p>4. Enable GitHub Pages in repository settings!</p>
-            </div>
-            <div class="flex justify-end">
-                <button onclick="closeAboutModal()" class="px-5 py-2 rounded bg-amber-600 hover:bg-amber-500 text-black cinzel font-semibold text-sm transition-all">
-                    Return to Map
+            <!-- Utilities -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleAudio()" id="audio-btn" title="Toggle Ambient Audio" class="p-2.5 rounded-xl bg-black/40 border border-tolkien-border hover:border-tolkien-gold text-stone-300 transition">
+                    <i data-lucide="volume-x" id="audio-icon" class="w-5 h-5"></i>
+                </button>
+                <button onclick="toggleWeather()" id="weather-btn" title="Toggle Weather / Atmospherics" class="p-2.5 rounded-xl bg-black/40 border border-tolkien-border hover:border-tolkien-gold text-stone-300 transition">
+                    <i data-lucide="cloud-rain" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
-    </div>
+    </header>
 
-    <script>
-        // Expanded Middle-earth Lore Dataset (19+ Locations)
-        const middleEarthLocations = [
-            {
-                id: 'shire',
-                name: 'The Shire / Bag End',
-                region: 'Eriador',
-                category: 'hobbit',
-                coords: { x: 14, y: 32 },
-                image: 'https://placehold.co/600x300/344e2e/f4ebd0?text=The+Shire+--+Bag+End',
-                description: 'A peaceful, agrarian sanctuary settled by hobbits. At the end of Bag Shot Row stands Bag End, the luxurious subterranean home of Bilbo and Frodo Baggins.',
-                events: [
-                    'TA 2941: Bilbo sets off on his quest with Thorin & Co.',
-                    'TA 3001: Bilbo’s Farewell Birthday Party.',
-                    'TA 3018: Nazgûl search Bag End for the One Ring.'
-                ],
-                inhabitants: 'Hobbits (Baggins, Gamgee, Took families)',
-                artifacts: 'The Red Book of Westmarch, Sting, Mithril waistcoat',
-                quote: 'I think I am quite ready for another adventure!',
-                quoteAuthor: 'Bilbo Baggins'
-            },
-            {
-                id: 'greyhavens',
-                name: 'Grey Havens (Mithlond)',
-                region: 'Eriador / Gulf of Lhûn',
-                category: 'elven',
-                coords: { x: 8, y: 25 },
-                image: 'https://placehold.co/600x300/223a45/f4ebd0?text=Grey+Havens+--+Mithlond',
-                description: 'The ancient elven port city on the Gulf of Lhûn established by Círdan the Shipwright, from which white elven ships depart across the Great Sea to Valinor.',
-                events: [
-                    'TA 3021: Frodo, Bilbo, Gandalf, Elrond, and Galadriel board the last ship departing Middle-earth.'
-                ],
-                inhabitants: 'Círdan the Shipwright, Elven mariners',
-                artifacts: 'Elven white ships, Narya (the Ring of Fire)',
-                quote: 'The Grey Havens... where ships slip away into the West.',
-                quoteAuthor: 'Elrond'
-            },
-            {
-                id: 'bree',
-                name: 'Bree & The Prancing Pony',
-                region: 'Eriador',
-                category: 'men',
-                coords: { x: 24, y: 35 },
-                image: 'https://placehold.co/600x300/4d3826/f4ebd0?text=Bree+--+Prancing+Pony',
-                description: 'A large, ancient village where Men and Hobbits live side by side. The Prancing Pony inn, run by Barliman Butterbur, serves as a vital meeting hub.',
-                events: [
-                    'TA 3018: Frodo puts on the Ring by accident; Aragorn (Strider) meets the hobbits in the common room.'
-                ],
-                inhabitants: 'Men of Bree, Hobbits, Barliman Butterbur, Bill Ferny',
-                artifacts: 'Good Southron pipe-weed, ale',
-                quote: 'If you are seeking trouble, you’ve come to the right place.',
-                quoteAuthor: 'Barliman Butterbur'
-            },
-            {
-                id: 'weathertop',
-                name: 'Weathertop (Amon Sûl)',
-                region: 'Eriador',
-                category: 'shadow',
-                coords: { x: 32, y: 28 },
-                image: 'https://placehold.co/600x300/38312b/dfb15b?text=Weathertop+--+Amon+Sûl',
-                description: 'The southernmost hill of the Weather Hills bearing the ruined watchtower built by the kings of Arnor, where Elendil once stored a royal Palantír.',
-                events: [
-                    'TA 3018: The Ring-wraiths ambush Frodo and wound him with a Morgul blade.'
-                ],
-                inhabitants: 'None (haunted by Nazgûl)',
-                artifacts: 'Palantír of Amon Sûl (destroyed long ago)',
-                quote: 'Not all those who wander are lost.',
-                quoteAuthor: 'Aragorn'
-            },
-            {
-                id: 'rivendell',
-                name: 'Rivendell (Imladris)',
-                region: 'Eriador / Misty Mountains',
-                category: 'elven',
-                coords: { x: 42, y: 22 },
-                image: 'https://placehold.co/600x300/2c3e45/f4ebd0?text=Rivendell+--+The+Last+Homely+House',
-                description: 'The secluded refuge of Elrond Half-elven, nestled in a steep river valley of the Misty Mountains. A beacon of ancient lore and healing.',
-                events: [
-                    'TA 3018: Council of Elrond; the Fellowship of the Ring is formed.'
-                ],
-                inhabitants: 'Elrond, Arwen, Glorfindel, Elven scholars',
-                artifacts: 'Shards of Narsil / Andúril, Elven scrolls',
-                quote: 'Faithful be your speech, even if it leads you to doom.',
-                quoteAuthor: 'Elrond'
-            },
-            {
-                id: 'moria',
-                name: 'Mines of Moria (Khazad-dûm)',
-                region: 'Misty Mountains',
-                category: 'dwarven',
-                coords: { x: 50, y: 40 },
-                image: 'https://placehold.co/600x300/3d2c1d/dfb15b?text=Moria+--+Khazad-dûm',
-                description: 'The vast subterranean dwarven realm carved beneath the mountains, renowned for mithril. Now overrun by orcs and a Balrog of Morgoth.',
-                events: [
-                    'TA 3019: Gandalf falls into the abyss fighting Durin’s Bane.'
-                ],
-                inhabitants: 'Orcs, Cave Trolls, Balrog',
-                artifacts: 'Balin’s Tomb, Durin’s Axe, Mithril armor',
-                quote: 'You shall not pass!',
-                quoteAuthor: 'Gandalf'
-            },
-            {
-                id: 'lothlorien',
-                name: 'Lothlórien (Caras Galadhon)',
-                region: 'Rhovanion',
-                category: 'elven',
-                coords: { x: 57, y: 45 },
-                image: 'https://placehold.co/600x300/2e4233/dfb15b?text=Lothlórien+--+Golden+Wood',
-                description: 'The golden realm of the Galadhrim among towering mallorn trees, ruled by Lady Galadriel and Lord Celeborn.',
-                events: [
-                    'TA 3019: The Fellowship rests in Caras Galadhon; Frodo looks into the Mirror of Galadriel.'
-                ],
-                inhabitants: 'Galadhrim Elves, Galadriel, Celeborn',
-                artifacts: 'Mirror of Galadriel, Phial of Galadriel, Lembas',
-                quote: 'The world is changed. I feel it in the water...',
-                quoteAuthor: 'Galadriel'
-            },
-            {
-                id: 'amonhen',
-                name: 'Amon Hen & Rauros',
-                region: 'Gondor / River Anduin',
-                category: 'men',
-                coords: { x: 62, y: 50 },
-                image: 'https://placehold.co/600x300/3e4233/dfb15b?text=Amon+Hen+--+Hill+of+Sight',
-                description: 'The Hill of Sight overlooking the great falls of Rauros where the Nen Hithoel lake empties southward.',
-                events: [
-                    'TA 3019: Boromir attempts to take the Ring from Frodo; Boromir falls defending Merry and Pippin; the Fellowship breaks.'
-                ],
-                inhabitants: 'None',
-                artifacts: 'Seat of Seeing',
-                quote: 'I would have gone with you to the end, into the very fires of Mordor.',
-                quoteAuthor: 'Boromir'
-            },
-            {
-                id: 'fangorn',
-                name: 'Fangorn Forest',
-                region: 'Rhovanion / Calenardhon',
-                category: 'hobbit',
-                coords: { x: 52, y: 55 },
-                image: 'https://placehold.co/600x300/213824/dfb15b?text=Fangorn+Forest+--+Treebeard',
-                description: 'An ancient, sprawling forest at the southern feet of the Misty Mountains, home to Treebeard and the ancient Ents.',
-                events: [
-                    'TA 3019: Merry and Pippin escape Orcs into Fangorn and meet Treebeard; the Entmoot decides to march on Isengard.'
-                ],
-                inhabitants: 'Treebeard (Fangorn), Ents, Huorns',
-                artifacts: 'Ent-draughts',
-                quote: 'Do not be hasty, little hobbit.',
-                quoteAuthor: 'Treebeard'
-            },
-            {
-                id: 'isengard',
-                name: 'Isengard & Orthanc',
-                region: 'Enedwaith / Nan Curunír',
-                category: 'shadow',
-                coords: { x: 48, y: 60 },
-                image: 'https://placehold.co/600x300/2b2522/dfb15b?text=Isengard+--+Tower+of+Orthanc',
-                description: 'A circular valley enclosed by ring-walls of stone, featuring the indestructible black tower of Orthanc, corrupted by Saruman the White.',
-                events: [
-                    'TA 3019: Ents destroy Isengard, flooding the ring-wall in the Wrath of the Ents.'
-                ],
-                inhabitants: 'Saruman, Uruk-hai, Orcs',
-                artifacts: 'Palantír of Orthanc, Saruman’s staff',
-                quote: 'Against the power of Mordor there can be no victory.',
-                quoteAuthor: 'Saruman'
-            },
-            {
-                id: 'helmsdeep',
-                name: 'Helm’s Deep (Hornburg)',
-                region: 'Rohan',
-                category: 'men',
-                coords: { x: 55, y: 65 },
-                image: 'https://placehold.co/600x300/403b35/dfb15b?text=Helm’s+Deep+--+Hornburg',
-                description: 'A massive gorge and fortress stronghold carved into the White Mountains under the Thrihyrne, serving as Rohan’s ultimate redoubt.',
-                events: [
-                    'TA 3019: The Battle of Helm’s Deep; King Théoden and Aragorn repel Saruman’s Uruk-hai army.'
-                ],
-                inhabitants: 'Rohirrim, King Théoden, Éomer',
-                artifacts: 'Horn of Helm Hammerhand',
-                quote: 'Ride now, ride now! Ride to ruin and the world’s ending!',
-                quoteAuthor: 'Théoden'
-            },
-            {
-                id: 'edoras',
-                name: 'Edoras & Meduseld',
-                region: 'Rohan',
-                category: 'men',
-                coords: { x: 60, y: 62 },
-                image: 'https://placehold.co/600x300/524330/dfb15b?text=Edoras+--+Golden+Hall',
-                description: 'The hill-fort capital of Rohan, topped by Meduseld, the great Golden Hall of the Kings of the Mark with its thatched roof gleaming gold in the sun.',
-                events: [
-                    'TA 3019: Gandalf heals King Théoden from Grima Wormtongue’s spell.'
-                ],
-                inhabitants: 'Rohirrim, King Théoden, Éowyn, Gríma Wormtongue',
-                artifacts: 'Standard of the Horse',
-                quote: 'Dark have been my dreams of late.',
-                quoteAuthor: 'Théoden'
-            },
-            {
-                id: 'minastirith',
-                name: 'Minas Tirith',
-                region: 'Gondor',
-                category: 'men',
-                coords: { x: 70, y: 68 },
-                image: 'https://placehold.co/600x300/4a4a4a/dfb15b?text=Minas+Tirith+--+The+White+City',
-                description: 'The magnificent seven-tiered capital of Gondor built against Mount Mindolluin, guarding the western lands from Mordor.',
-                events: [
-                    'TA 3019: Siege of Gondor; Battle of the Pelennor Fields.'
-                ],
-                inhabitants: 'Men of Gondor, Stewards, Citadel Guards',
-                artifacts: 'The White Tree of Gondor, Crown of King Elessar',
-                quote: 'The days are full of sorrow. But let us not despair!',
-                quoteAuthor: 'Imrahil'
-            },
-            {
-                id: 'osgiliath',
-                name: 'Osgiliath',
-                region: 'Gondor / River Anduin',
-                category: 'men',
-                coords: { x: 75, y: 70 },
-                image: 'https://placehold.co/600x300/383531/dfb15b?text=Osgiliath+--+Ruined+Capital',
-                description: 'The ancient ruined capital city of Gondor spanning both banks of the River Anduin, fiercely contested in the war.',
-                events: [
-                    'TA 3019: Crossed by the Witch-king’s vanguard prior to the siege of Minas Tirith.'
-                ],
-                inhabitants: 'Gondorian garrison, Orcs of Mordor',
-                artifacts: 'Stone-bridge over Anduin, ruined domes',
-                quote: 'Osgiliath is fallen! The eastern bank is overrun.',
-                quoteAuthor: 'Gondorian Captain'
-            },
-            {
-                id: 'minasmorgul',
-                name: 'Minas Morgul (Minas Ithil)',
-                region: 'Mordor / Ephel Dúath',
-                category: 'shadow',
-                coords: { x: 80, y: 72 },
-                image: 'https://placehold.co/600x300/20302b/dfb15b?text=Minas+Morgul+--+Tower+of+Sorcery',
-                description: 'The dreadful dead city gleaming with an eerie pale light, ruled by the Witch-king of Angmar as the primary staging fortress of Mordor.',
-                events: [
-                    'TA 3019: The Witch-king leads the armies of Mordor out to war against Gondor.'
-                ],
-                inhabitants: 'Witch-king of Angmar, Nazgûl, Orc legions',
-                artifacts: 'The Palantír of Minas Ithil (captured)',
-                quote: 'A shadow fell on the city, and the light died.',
-                quoteAuthor: 'Chronicles'
-            },
-            {
-                id: 'cirithungol',
-                name: 'Cirith Ungol',
-                region: 'Mordor / Mountains of Shadow',
-                category: 'shadow',
-                coords: { x: 84, y: 75 },
-                image: 'https://placehold.co/600x300/241d1a/dfb15b?text=Cirith+Ungol+--+Spider+Pass',
-                description: 'The high mountain pass into Mordor guarded by the tower of Cirith Ungol and haunted by Shelob, the giant ancient spider.',
-                events: [
-                    'TA 3019: Shelob poisons Frodo; Samwise Gamgee rescues Frodo from the tower.'
-                ],
-                inhabitants: 'Shelob, Orc garrison',
-                artifacts: 'Sting, Phial of Galadriel, Mithril shirt',
-                quote: 'I’m coming, Mr. Frodo!',
-                quoteAuthor: 'Samwise Gamgee'
-            },
-            {
-                id: 'mountdoom',
-                name: 'Mount Doom (Orodruin)',
-                region: 'Mordor',
-                category: 'shadow',
-                coords: { x: 92, y: 78 },
-                image: 'https://placehold.co/600x300/3b1414/dfb15b?text=Mount+Doom+--+Crack+of+Doom',
-                description: 'The volcano within Gorgoroth where Sauron forged the One Ring in the Second Age, and where it must be cast to be unmade.',
-                events: [
-                    'TA 3019: Frodo and Sam reach the Crack of Doom; Gollum wrests the Ring and falls into the fire.'
-                ],
-                inhabitants: 'Sauron (spirit)',
-                artifacts: 'The One Ring (destroyed)',
-                quote: 'The Ring is mine!',
-                quoteAuthor: 'Frodo Baggins'
-            },
-            {
-                id: 'baraddur',
-                name: 'Barad-dûr',
-                region: 'Mordor',
-                category: 'shadow',
-                coords: { x: 96, y: 82 },
-                image: 'https://placehold.co/600x300/221010/dfb15b?text=Barad-dûr+--+The+Dark+Tower',
-                description: 'The colossal Dark Tower of Sauron, piercing the ash-choked skies of Mordor, crowned by the unblinking Eye of Sauron.',
-                events: [
-                    'TA 3019: The Ring is destroyed at Mount Doom, causing Barad-dûr to collapse into ruin.'
-                ],
-                inhabitants: 'Sauron, commanders of Mordor',
-                artifacts: 'The Great Eye',
-                quote: 'He sees you. The Great Eye is ever watchful.',
-                quoteAuthor: 'Aragorn'
-            }
-        ];
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col">
 
-        let currentCategory = 'all';
-        let journeyActive = false;
+        <!-- ================= MAP TAB ================= -->
+        <div id="view-map" class="space-y-6">
+            
+            <!-- Controls Bar -->
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-tolkien-cardbg border border-tolkien-border p-4 rounded-2xl shadow-xl">
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0">
+                    <span class="text-xs font-cinzel uppercase tracking-wider text-stone-400 whitespace-nowrap">Era:</span>
+                    <button onclick="switchAge('third')" id="age-third" class="px-3 py-1.5 rounded-lg text-xs font-cinzel font-bold bg-tolkien-gold text-black transition">Third Age (LOTR)</button>
+                    <button onclick="switchAge('second')" id="age-second" class="px-3 py-1.5 rounded-lg text-xs font-cinzel font-bold bg-black/40 text-stone-300 border border-tolkien-border transition">Second Age</button>
+                    <button onclick="switchAge('first')" id="age-first" class="px-3 py-1.5 rounded-lg text-xs font-cinzel font-bold bg-black/40 text-stone-300 border border-tolkien-border transition">First Age</button>
+                </div>
 
-        // Initialize Map Markers
-        function initMap(filter = 'all', searchQuery = '') {
-            const container = document.getElementById('markersContainer');
-            container.innerHTML = '';
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative flex-1 sm:flex-initial">
+                        <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="search-input" oninput="filterLocations()" placeholder="Search locations..." class="w-full sm:w-64 bg-black/60 border border-tolkien-border rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-tolkien-gold text-tolkien-parchment placeholder-stone-500">
+                    </div>
+                    <select id="category-filter" onchange="filterLocations()" class="bg-black/60 border border-tolkien-border rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-tolkien-gold text-tolkien-parchment">
+                        <option value="all">All Categories</option>
+                        <option value="Realms of Men">Realms of Men</option>
+                        <option value="Elven Realms">Elven Realms</option>
+                        <option value="Dwarven Realms">Dwarven Realms</option>
+                        <option value="Dark Lands">Dark Lands</option>
+                        <option value="The Shire & Vales">The Shire & Vales</option>
+                    </select>
+                </div>
+            </div>
 
-            const filtered = middleEarthLocations.filter(loc => {
-                const matchesCat = (filter === 'all' || loc.category === filter);
-                const matchesSearch = loc.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                      loc.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                      loc.description.toLowerCase().includes(searchQuery.toLowerCase());
-                return matchesCat && matchesSearch;
-            });
+            <!-- Map Layout Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Map Canvas Area -->
+                <div class="lg:col-span-2 bg-tolkien-cardbg border border-tolkien-border rounded-2xl overflow-hidden shadow-2xl relative flex flex-col">
+                    
+                    <!-- Toolbar Overlay -->
+                    <div class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/80 backdrop-blur border border-tolkien-border p-1.5 rounded-xl shadow-lg">
+                        <button onclick="zoomMap(0.2)" title="Zoom In" class="p-2 hover:bg-tolkien-border rounded-lg text-stone-200 transition"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                        <button onclick="zoomMap(-0.2)" title="Zoom Out" class="p-2 hover:bg-tolkien-border rounded-lg text-stone-200 transition"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                        <button onclick="resetZoom()" title="Reset View" class="p-2 hover:bg-tolkien-border rounded-lg text-stone-200 transition"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>
+                        <div class="w-[1px] h-5 bg-stone-700 mx-1"></div>
+                        <button onclick="toggleFellowshipPath()" id="path-toggle-btn" class="px-3 py-1.5 rounded-lg text-xs font-cinzel font-semibold bg-tolkien-gold/20 text-tolkien-gold border border-tolkien-gold/40 flex items-center gap-1.5 transition">
+                            <i data-lucide="footprints" class="w-3.5 h-3.5"></i> Path
+                        </button>
+                    </div>
 
-            filtered.forEach((loc) => {
-                const btn = document.createElement('button');
-                btn.className = 'absolute transform -translate-x-1/2 -translate-y-1/2 group focus:outline-none transition-transform duration-300 hover:scale-125';
-                btn.style.left = `${loc.coords.x}%`;
-                btn.style.top = `${loc.coords.y}%`;
-                btn.setAttribute('aria-label', loc.name);
+                    <!-- Explicit Viewport Height to Fix Display -->
+                    <div id="map-viewport" class="w-full h-[600px] md:h-[650px] relative overflow-hidden parchment-texture cursor-grab active:cursor-grabbing" onmousedown="startPan(event)" onmousemove="panMap(event)" onmouseup="endPan()" onmouseleave="endPan()" onwheel="handleWheel(event)">
+                        
+                        <div id="map-canvas" class="absolute inset-0 w-full h-full transition-transform duration-75 origin-center">
+                            
+                            <!-- SVG Path -->
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none" id="journey-svg">
+                                <path id="fellowship-path-line" d="M 180 320 Q 280 250 390 300 T 520 280 Q 650 350 780 480" fill="none" stroke="#d4af37" stroke-width="3" stroke-dasharray="6,6" opacity="0.8"/>
+                            </svg>
 
-                btn.innerHTML = `
-                    <div class="relative flex items-center justify-center">
-                        <div class="absolute w-7 h-7 rounded-full bg-amber-500/30 marker-pulse"></div>
-                        <div class="w-5 h-5 rounded-full bg-stone-900 border-2 border-amber-500 flex items-center justify-center shadow-lg group-hover:bg-amber-600 group-hover:border-amber-200 transition-colors">
-                            <span class="cinzel text-[9px] font-bold text-amber-200 group-hover:text-black">✦</span>
-                        </div>
-                        <div class="absolute top-6 bg-black/85 border border-amber-800/60 px-2 py-0.5 rounded text-[10px] cinzel text-amber-200 whitespace-nowrap shadow-md opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all">
-                            ${loc.name.split('/')[0]}
+                            <!-- Pins Container -->
+                            <div id="map-pins-container" class="absolute inset-0 w-full h-full"></div>
+
                         </div>
                     </div>
-                `;
 
-                btn.onclick = () => selectLocation(loc);
-                container.appendChild(btn);
+                    <!-- Map Footer Info -->
+                    <div class="p-3 bg-black/80 border-t border-tolkien-border flex items-center justify-between text-xs text-stone-400">
+                        <span id="map-era-title" class="font-cinzel text-tolkien-gold font-semibold">Third Age: The War of the Ring</span>
+                        <span>Drag to pan | Scroll to zoom | Click pins</span>
+                    </div>
+                </div>
+
+                <!-- Sidebar Details Panel -->
+                <div class="bg-tolkien-cardbg border border-tolkien-border rounded-2xl p-5 flex flex-col shadow-2xl h-[650px]">
+                    
+                    <div id="location-detail-panel" class="mb-4 pb-4 border-b border-tolkien-border">
+                        <div class="flex items-start justify-between gap-3 mb-2">
+                            <div>
+                                <span id="detail-category" class="text-[10px] font-cinzel uppercase tracking-widest px-2 py-0.5 rounded bg-tolkien-gold/20 text-tolkien-gold border border-tolkien-gold/30">Select a Pin</span>
+                                <h2 id="detail-title" class="text-xl font-bold font-cinzel text-tolkien-parchment mt-1">Explore Middle-earth</h2>
+                            </div>
+                            <div id="detail-icon" class="p-2.5 rounded-xl bg-black/40 border border-tolkien-border text-tolkien-gold">
+                                <i data-lucide="map-pin" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                        <p id="detail-description" class="text-xs text-stone-300 font-lora leading-relaxed mb-3">
+                            Click any location marker on the map or choose an entry from the directory below to reveal ancient histories and lore.
+                        </p>
+                        <div id="detail-quote-box" class="hidden bg-black/40 border-l-2 border-tolkien-gold p-3 rounded-r-xl italic text-xs text-stone-300 font-lora">
+                            "<span id="detail-quote"></span>"
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-cinzel font-bold text-stone-300 uppercase tracking-wider">Locations Directory</h3>
+                        <span id="location-count" class="text-xs text-stone-500 font-cinzel">0 locations</span>
+                    </div>
+
+                    <div id="locations-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TIMELINE TAB ================= -->
+        <div id="view-timeline" class="hidden space-y-6">
+            <div class="bg-tolkien-cardbg border border-tolkien-border rounded-2xl p-6 shadow-2xl">
+                <div class="max-w-3xl mx-auto text-center space-y-2 mb-8">
+                    <h2 class="text-2xl font-bold font-cinzel text-tolkien-gold">The Fellowship Journey Timeline</h2>
+                    <p class="text-xs text-stone-400">Scrub through chapters of the Ring-bearer's quest.</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-6 mb-10">
+                    <div class="flex items-center justify-between text-xs font-cinzel text-tolkien-gold">
+                        <span id="timeline-chapter-num">Chapter 1</span>
+                        <span id="timeline-chapter-date" class="text-stone-400">Third Age 3018</span>
+                    </div>
+                    <input type="range" id="timeline-slider" min="0" max="5" value="0" step="1" oninput="updateTimeline(this.value)" class="w-full accent-[#d4af37] cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-stone-500 font-cinzel">
+                        <span>Hobbiton</span><span>Rivendell</span><span>Moria</span><span>Lórien</span><span>Rauros</span><span>Mount Doom</span>
+                    </div>
+                </div>
+
+                <div class="max-w-2xl mx-auto bg-black/40 border border-tolkien-border rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                    <h3 id="timeline-title" class="text-xl font-bold font-cinzel text-tolkien-gold mb-2">The Long-expected Party & Departure</h3>
+                    <p id="timeline-desc" class="text-xs md:text-sm text-stone-300 font-lora leading-relaxed mb-4">
+                        Frodo Baggins inherits the One Ring from Bilbo. Gandalf discovers its true dark origin and urges Frodo to flee the Shire.
+                    </p>
+                    <div class="flex items-center gap-2 text-xs text-stone-400 font-cinzel">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-tolkien-gold"></i>
+                        <span>Active Location: <strong id="timeline-location" class="text-tolkien-parchment">The Shire</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= QUIZ TAB ================= -->
+        <div id="view-quiz" class="hidden space-y-6">
+            <div class="max-w-2xl mx-auto bg-tolkien-cardbg border border-tolkien-border rounded-2xl p-6 md:p-8 shadow-2xl">
+                <div class="text-center space-y-2 mb-6">
+                    <span class="text-xs font-cinzel uppercase tracking-widest text-tolkien-gold">Tolkien Lore Challenge</span>
+                    <h2 class="text-2xl font-bold font-cinzel text-tolkien-parchment">Where in Arda?</h2>
+                </div>
+
+                <div id="quiz-card" class="space-y-6">
+                    <div class="bg-black/50 border border-tolkien-border p-5 rounded-xl text-center">
+                        <p id="quiz-question" class="text-sm md:text-base font-lora italic text-tolkien-parchment"></p>
+                    </div>
+                    <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                    <div id="quiz-feedback" class="text-center text-xs font-cinzel hidden"></div>
+                    <div class="flex justify-center pt-4">
+                        <button onclick="nextQuizQuestion()" id="quiz-next-btn" class="hidden px-6 py-2 bg-tolkien-gold text-black font-cinzel font-bold text-xs rounded-xl shadow hover:bg-tolkien-darkgold transition">Next Riddle</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-tolkien-border bg-tolkien-cardbg/90 py-4 text-center text-xs text-stone-500 font-cinzel mt-auto">
+        <p>Created for Tolkien fans worldwide. The Lord of the Rings &copy; J.R.R. Tolkien.</p>
+    </footer>
+
+    <!-- Script Application Logic -->
+    <script>
+        const middleEarthData = {
+            third: {
+                title: "Third Age: The War of the Ring",
+                locations: [
+                    { id: 'shire', name: 'The Shire', category: 'The Shire & Vales', x: 20, y: 50, desc: 'A peaceful, pastoral land inhabited by Hobbits, nestled in the northwest of Eriador.', quote: "In a hole in the ground there lived a hobbit.", icon: 'home' },
+                    { id: 'rivendell', name: 'Rivendell (Imladris)', category: 'Elven Realms', x: 42, y: 45, desc: 'The Last Homely House East of the Sea, hidden deep in the foothills of the Misty Mountains.', quote: "Here is the meeting place of Elves and Men.", icon: 'shield' },
+                    { id: 'moria', name: 'Khazad-dûm (Moria)', category: 'Dwarven Realms', x: 48, y: 60, desc: 'The ancient and magnificent subterranean realm of the Dwarves, now overrun by shadow.', quote: "The world is changed. I feel it in the water.", icon: 'mountain' },
+                    { id: 'lorien', name: 'Lothlórien', category: 'Elven Realms', x: 58, y: 58, desc: 'The golden wood of the Galadhrim, ruled by Lady Galadriel and Celeborn.', quote: "The power of the Three Rings is dread and wise.", icon: 'sparkles' },
+                    { id: 'rohan', name: 'Edoras & Rohan', category: 'Realms of Men', x: 65, y: 72, desc: 'The vast grassy plains of the Horse-lords, famous for their mighty cavalry.', quote: "Arise, arise, Riders of Théoden!", icon: 'flag' },
+                    { id: 'gondor', name: 'Minas Tirith', category: 'Realms of Men', x: 80, y: 82, desc: 'The White City and capital of Gondor, built in seven towering tiers.', quote: "Hope is not dwindled.", icon: 'castle' },
+                    { id: 'mordor', name: 'Mordor & Mount Doom', category: 'Dark Lands', x: 90, y: 78, desc: 'The desolate volcanic land of Sauron, bounded by jagged mountain ranges.', quote: "One Ring to rule them all...", icon: 'flame' },
+                    { id: 'erebor', name: 'Erebor (Lonely Mountain)', category: 'Dwarven Realms', x: 74, y: 30, desc: 'The majestic underground kingdom of the Dwarves under the mountain.', quote: "Far over the misty mountains cold...", icon: 'gem' }
+                ]
+            },
+            second: {
+                title: "Second Age: Númenor & Eregion",
+                locations: [
+                    { id: 'numenor', name: 'Númenor', category: 'Realms of Men', x: 20, y: 60, desc: 'The legendary star-shaped island kingdom bestowed upon the Edain.', quote: "And the isle of Elenna sank beneath the great waves.", icon: 'anchor' },
+                    { id: 'eregion', name: 'Eregion', category: 'Elven Realms', x: 45, y: 48, desc: 'The Elven realm where the Rings of Power were forged.', quote: "The Rings of Power were crafted in craftiness.", icon: 'sparkles' },
+                    { id: 'lindon', name: 'Lindon', category: 'Elven Realms', x: 25, y: 40, desc: 'The westernmost Elven realm in Middle-earth under High King Gil-galad.', quote: "Grey ship upon the western sea.", icon: 'feather' }
+                ]
+            },
+            first: {
+                title: "First Age: Wars of Beleriand",
+                locations: [
+                    { id: 'gondolin', name: 'Gondolin', category: 'Elven Realms', x: 35, y: 40, desc: 'The secret hidden city of King Turgon.', quote: "Hidden from the eyes of Morgoth.", icon: 'shield' },
+                    { id: 'angband', name: 'Angband', category: 'Dark Lands', x: 65, y: 25, desc: 'The great subterranean fortress of Morgoth, the first Dark Lord.', quote: "The Iron Hells of Melkor.", icon: 'flame' },
+                    { id: 'doriath', name: 'Doriath', category: 'Elven Realms', x: 50, y: 55, desc: 'The protected woodland realm of King Thingol and Melian.', quote: "The protected forest of the Sindar.", icon: 'sparkles' }
+                ]
+            }
+        };
+
+        const timelineChapters = [
+            { num: "Chapter 1", title: "The Ring Leaves Hobbiton", date: "Third Age 3018", location: "The Shire", desc: "Frodo inherits the One Ring and flees the Shire." },
+            { num: "Chapter 2", title: "Council of Elrond", date: "Third Age 3018", location: "Rivendell", desc: "The Fellowship of the Ring is formed." },
+            { num: "Chapter 3", title: "The Mines of Moria", date: "Third Age 3019", location: "Khazad-dûm", desc: "Gandalf falls battling the Balrog." },
+            { num: "Chapter 4", title: "Light of Lórien", date: "Third Age 3019", location: "Lothlórien", desc: "Refuge in the golden wood." },
+            { num: "Chapter 5", title: "Breaking of the Fellowship", date: "Third Age 3019", location: "Rohan", desc: "Frodo and Sam set off alone toward Mordor." },
+            { num: "Chapter 6", title: "Destruction of the Ring", date: "Third Age 3019", location: "Mount Doom", desc: "The One Ring is destroyed." }
+        ];
+
+        const quizQuestions = [
+            { question: "What is the secret Elvish password to open the Doors of Durin?", options: ["Mellon (Friend)", "Elbereth", "Namarie", "Annon Edhellen"], answer: 0 },
+            { question: "Who forged the Rings of Power under Sauron's disguise?", options: ["Fëanor", "Celebrimbor", "Elrond", "Galadriel"], answer: 1 },
+            { question: "What is the name of Aragorn’s legendary re-forged sword?", options: ["Glamdring", "Sting", "Andúril", "Orcrist"], answer: 2 },
+            { question: "Which creature trapped Frodo and Sam in its web at Cirith Ungol?", options: ["Smaug", "Shelob", "The Balrog", "Ancalagon"], answer: 1 }
+        ];
+
+        let currentAge = 'third';
+        let isPathVisible = true;
+        let isAudioPlaying = false;
+        let activeWeather = 'none';
+        let currentQuizIndex = 0;
+
+        let scale = 1, panX = 0, panY = 0, isPanning = false, startX = 0, startY = 0;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            switchAge('third');
+            lucide.createIcons();
+            initQuiz();
+        });
+
+        function switchTab(tab) {
+            ['map', 'timeline', 'quiz'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).className = "px-4 py-1.5 rounded-lg text-sm font-cinzel font-semibold transition-all text-stone-300 hover:text-white";
             });
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tab}`).className = "px-4 py-1.5 rounded-lg text-sm font-cinzel font-semibold transition-all bg-tolkien-gold text-black shadow";
+            lucide.createIcons();
         }
 
-        // Category Filter Control
-        function setCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.category-btn').forEach(b => {
-                b.className = 'category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-stone-800 text-stone-300 hover:bg-stone-700 transition-all';
+        function switchAge(age) {
+            currentAge = age;
+            ['third', 'second', 'first'].forEach(a => {
+                const btn = document.getElementById(`age-${a}`);
+                if (a === age) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-cinzel font-bold bg-tolkien-gold text-black transition";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-cinzel font-bold bg-black/40 text-stone-300 border border-tolkien-border transition";
+                }
             });
-            document.getElementById(`cat-${cat}`).className = 'category-btn px-3 py-1 rounded text-xs cinzel font-semibold bg-amber-600 text-black transition-all';
+
+            const data = middleEarthData[age];
+            document.getElementById('map-era-title').textContent = data.title;
             
-            const query = document.getElementById('searchInput').value;
-            initMap(currentCategory, query);
-        }
-
-        // Search Filter Control
-        function filterLocations() {
-            const query = document.getElementById('searchInput').value;
-            initMap(currentCategory, query);
-        }
-
-        // Select Location and Populate Sidebar
-        function selectLocation(loc) {
-            document.getElementById('sidebarDefault').classList.add('hidden');
-            document.getElementById('sidebarContent').classList.remove('hidden');
-
-            document.getElementById('locImage').src = loc.image;
-            document.getElementById('locRegion').innerText = loc.region;
-            document.getElementById('locTitle').innerText = loc.name;
-            document.getElementById('locDescription').innerText = loc.description;
-
-            const eventsList = document.getElementById('locEvents');
-            eventsList.innerHTML = '';
-            loc.events.forEach(event => {
-                const li = document.createElement('li');
-                li.className = 'flex items-start space-x-2';
-                li.innerHTML = `<span class="text-amber-500 mt-0.5">▪</span><span>${event}</span>`;
-                eventsList.appendChild(li);
-            });
-
-            document.getElementById('locInhabitants').innerText = loc.inhabitants;
-            document.getElementById('locArtifacts').innerText = loc.artifacts;
-            document.getElementById('locQuote').innerText = `"${loc.quote}"`;
-            document.getElementById('locQuoteAuthor').innerText = `— ${loc.quoteAuthor}`;
-        }
-
-        // Toggle Fellowship Path
-        function toggleJourney() {
-            journeyActive = !journeyActive;
-            const pathGroup = document.getElementById('fellowshipPathGroup');
-            const btnText = document.getElementById('journeyBtnText');
-            const btn = document.getElementById('toggleJourneyBtn');
-
-            if (journeyActive) {
-                pathGroup.classList.remove('opacity-0');
-                pathGroup.classList.add('opacity-100');
-                btnText.innerText = 'Fellowship Path: Active';
-                btn.classList.add('bg-amber-700/50', 'border-amber-400');
+            const pathLine = document.getElementById('fellowship-path-line');
+            const pathBtn = document.getElementById('path-toggle-btn');
+            if (age === 'third') {
+                pathLine.style.display = 'block';
+                pathBtn.style.display = 'flex';
             } else {
-                pathGroup.classList.remove('opacity-100');
-                pathGroup.classList.add('opacity-0');
-                btnText.innerText = 'Fellowship Path: Off';
-                btn.classList.remove('bg-amber-700/50', 'border-amber-400');
+                pathLine.style.display = 'none';
+                pathBtn.style.display = 'none';
+            }
+
+            renderMapPins();
+            renderLocationsList();
+        }
+
+        function renderMapPins(filterText = '', filterCat = 'all') {
+            const container = document.getElementById('map-pins-container');
+            container.innerHTML = '';
+
+            const locations = middleEarthData[currentAge].locations;
+            locations.forEach(loc => {
+                if (filterText && !loc.name.toLowerCase().includes(filterText.toLowerCase())) return;
+                if (filterCat !== 'all' && loc.category !== filterCat) return;
+
+                const pin = document.createElement('div');
+                pin.className = `absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group flex flex-col items-center z-10 transition-transform hover:scale-110`;
+                pin.style.left = `${loc.x}%`;
+                pin.style.top = `${loc.y}%`;
+                pin.onclick = (e) => { e.stopPropagation(); selectLocation(loc); };
+
+                pin.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-tolkien-cardbg border-2 border-tolkien-gold shadow-lg flex items-center justify-center text-tolkien-gold group-hover:bg-tolkien-gold group-hover:text-black transition duration-200">
+                        <i data-lucide="${loc.icon}" class="w-4 h-4"></i>
+                    </div>
+                    <span class="mt-1 px-2 py-0.5 rounded bg-black/80 border border-tolkien-border text-[10px] font-cinzel text-tolkien-parchment whitespace-nowrap shadow-md group-hover:border-tolkien-gold">${loc.name}</span>
+                `;
+                container.appendChild(pin);
+            });
+            lucide.createIcons();
+        }
+
+        function renderLocationsList() {
+            const listContainer = document.getElementById('locations-list');
+            listContainer.innerHTML = '';
+            const locations = middleEarthData[currentAge].locations;
+
+            document.getElementById('location-count').textContent = `${locations.length} locations`;
+
+            locations.forEach(loc => {
+                const item = document.createElement('div');
+                item.className = "p-3 rounded-xl bg-black/40 border border-tolkien-border hover:border-tolkien-gold/60 cursor-pointer transition flex items-center justify-between group";
+                item.onclick = () => selectLocation(loc);
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-lg bg-tolkien-cardbg border border-tolkien-border text-tolkien-gold group-hover:bg-tolkien-gold group-hover:text-black transition">
+                            <i data-lucide="${loc.icon}" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold font-cinzel text-tolkien-parchment group-hover:text-tolkien-gold transition">${loc.name}</h4>
+                            <span class="text-[10px] text-stone-400">${loc.category}</span>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-stone-600 group-hover:text-tolkien-gold transition"></i>
+                `;
+                listContainer.appendChild(item);
+            });
+            lucide.createIcons();
+            if (locations.length > 0) selectLocation(locations[0]);
+        }
+
+        function selectLocation(loc) {
+            document.getElementById('detail-category').textContent = loc.category;
+            document.getElementById('detail-title').textContent = loc.name;
+            document.getElementById('detail-description').textContent = loc.desc;
+            
+            const quoteBox = document.getElementById('detail-quote-box');
+            if (loc.quote) {
+                quoteBox.classList.remove('hidden');
+                document.getElementById('detail-quote').textContent = loc.quote;
+            } else {
+                quoteBox.classList.add('hidden');
+            }
+            document.getElementById('detail-icon').innerHTML = `<i data-lucide="${loc.icon}" class="w-5 h-5"></i>`;
+            lucide.createIcons();
+        }
+
+        function filterLocations() {
+            const text = document.getElementById('search-input').value;
+            const cat = document.getElementById('category-filter').value;
+            renderMapPins(text, cat);
+        }
+
+        function updateTransform() {
+            document.getElementById('map-canvas').style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        }
+
+        function zoomMap(delta) {
+            scale = Math.min(Math.max(0.6, scale + delta), 2.5);
+            updateTransform();
+        }
+
+        function resetZoom() {
+            scale = 1; panX = 0; panY = 0;
+            updateTransform();
+        }
+
+        function startPan(e) {
+            if (e.target.closest('button') || e.target.closest('.group')) return;
+            isPanning = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+        }
+
+        function panMap(e) {
+            if (!isPanning) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            updateTransform();
+        }
+
+        function endPan() { isPanning = false; }
+
+        function handleWheel(e) {
+            e.preventDefault();
+            zoomMap(e.deltaY < 0 ? 0.15 : -0.15);
+        }
+
+        function toggleFellowshipPath() {
+            isPathVisible = !isPathVisible;
+            const line = document.getElementById('fellowship-path-line');
+            const btn = document.getElementById('path-toggle-btn');
+            line.style.display = isPathVisible ? 'block' : 'none';
+            btn.className = isPathVisible 
+                ? "px-3 py-1.5 rounded-lg text-xs font-cinzel font-semibold bg-tolkien-gold/20 text-tolkien-gold border border-tolkien-gold/40 flex items-center gap-1.5 transition"
+                : "px-3 py-1.5 rounded-lg text-xs font-cinzel font-semibold bg-black/40 text-stone-500 border border-tolkien-border flex items-center gap-1.5 transition";
+        }
+
+        function updateTimeline(val) {
+            const chapter = timelineChapters[val];
+            document.getElementById('timeline-chapter-num').textContent = chapter.num;
+            document.getElementById('timeline-chapter-date').textContent = chapter.date;
+            document.getElementById('timeline-title').textContent = chapter.title;
+            document.getElementById('timeline-desc').textContent = chapter.desc;
+            document.getElementById('timeline-location').textContent = chapter.location;
+        }
+
+        function initQuiz() {
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quiz-question').textContent = `"${q.question}"`;
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-3 rounded-xl bg-black/40 border border-tolkien-border hover:border-tolkien-gold text-sm font-lora text-tolkien-parchment transition text-left";
+                btn.textContent = opt;
+                btn.onclick = () => checkQuizAnswer(idx, q.answer);
+                optionsContainer.appendChild(btn);
+            });
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+        }
+
+        function checkQuizAnswer(selected, correct) {
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.remove('hidden');
+            if (selected === correct) {
+                feedback.textContent = "Correct! The wisdom of the Wise is with you.";
+                feedback.className = "text-center text-xs font-cinzel text-emerald-400";
+            } else {
+                feedback.textContent = "Incorrect! Darkness clouds your judgment.";
+                feedback.className = "text-center text-xs font-cinzel text-rose-400";
+            }
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex = (currentQuizIndex + 1) % quizQuestions.length;
+            initQuiz();
+        }
+
+        function toggleAudio() {
+            isAudioPlaying = !isAudioPlaying;
+            const icon = document.getElementById('audio-icon');
+            const btn = document.getElementById('audio-btn');
+            icon.setAttribute('data-lucide', isAudioPlaying ? 'volume-2' : 'volume-x');
+            btn.className = isAudioPlaying 
+                ? "p-2.5 rounded-xl bg-tolkien-gold/20 border border-tolkien-gold text-tolkien-gold transition"
+                : "p-2.5 rounded-xl bg-black/40 border border-tolkien-border hover:border-tolkien-gold text-stone-300 transition";
+            lucide.createIcons();
+        }
+
+        function toggleWeather() {
+            const container = document.getElementById('particle-container');
+            if (activeWeather === 'none') {
+                activeWeather = 'ash';
+                createParticles('rgba(200, 50, 20, 0.7)', 25);
+            } else if (activeWeather === 'ash') {
+                activeWeather = 'leaves';
+                container.innerHTML = '';
+                createParticles('rgba(80, 180, 80, 0.6)', 25);
+            } else {
+                activeWeather = 'none';
+                container.innerHTML = '';
             }
         }
 
-        function openAboutModal() {
-            document.getElementById('aboutModal').classList.remove('hidden');
+        function createParticles(color, count) {
+            const container = document.getElementById('particle-container');
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.width = `${Math.random() * 6 + 4}px`;
+                p.style.height = p.style.width;
+                p.style.backgroundColor = color;
+                p.style.left = `${Math.random() * 100}vw`;
+                p.style.top = `-20px`;
+                p.style.animationDuration = `${Math.random() * 5 + 4}s`;
+                p.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(p);
+            }
         }
-        function closeAboutModal() {
-            document.getElementById('aboutModal').classList.add('hidden');
-        }
-
-        window.onload = () => {
-            initMap();
-        };
     </script>
 </body>
 </html>
